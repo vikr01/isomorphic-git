@@ -14,13 +14,13 @@ export async function pack ({
   dir,
   gitdir = join(dir, '.git'),
   fs: _fs = cores.get(core).get('fs'),
-  oids,
-  outputStream
+  oids
 }) {
   const fs = new FileSystem(_fs)
   let hash = new Hash()
+  let output = []
   function write (chunk, enc) {
-    outputStream.write(chunk, enc)
+    output.push(Buffer.from(chunk, enc))
     hash.update(chunk, enc)
   }
   function writeObject ({ stype, object }) {
@@ -60,6 +60,6 @@ export async function pack ({
   }
   // Write SHA1 checksum
   let digest = hash.digest()
-  outputStream.end(digest)
-  return outputStream
+  output.push(digest)
+  return Buffer.concat(output)
 }

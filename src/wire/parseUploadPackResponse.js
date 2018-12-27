@@ -3,8 +3,8 @@ import through2 from 'through2'
 import { E, GitError } from '../models/GitError.js'
 import { GitSideBand } from '../models/GitSideBand.js'
 
-export async function parseUploadPackResponse (stream) {
-  const { packetlines, packfile, progress } = GitSideBand.demux(stream)
+export async function parseUploadPackResponse (buffer) {
+  const { packetlines, packfile, progress } = GitSideBand.demux(buffer)
   let shallows = []
   let unshallows = []
   let acks = []

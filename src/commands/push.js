@@ -135,19 +135,15 @@ export async function push ({
       [...httpRemote.capabilities],
       ['report-status', 'side-band-64k', `agent=${pkg.agent}`]
     )
-    let packstream = await writeReceivePackRequest({
+    let packrequest = await writeReceivePackRequest({
       capabilities,
       triplets: [{ oldoid, oid, fullRef: fullRemoteRef }]
     })
-    pack({
+    let packbuffer = await pack({
       fs,
       gitdir,
-      oids: [...objects],
-      outputStream: packstream
+      oids: [...objects]
     })
-    // The browser isn't capable of streaming uploads, so for API consistancy
-    // in the 'http' plugin we're going to simple coerce the packstream to a buffer.
-    let packbuffer = await pify(concat)(packstream)
     let res = await GitRemoteHTTP.connect({
       core,
       corsProxy,
@@ -156,7 +152,7 @@ export async function push ({
       noGitSuffix,
       auth,
       headers,
-      body: packbuffer
+      body: Buffer.concat([packrequest, packbuffer])
     })
     let { packfile, progress } = await GitSideBand.demux(res)
     if (emitter) {

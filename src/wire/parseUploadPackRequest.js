@@ -1,7 +1,7 @@
 import { GitPktLine } from '../models/GitPktLine.js'
 
-export async function parseUploadPackRequest (stream) {
-  let read = GitPktLine.streamReader(stream)
+export async function parseUploadPackRequest (buffer) {
+  let read = GitPktLine.streamReader(buffer)
   let done = false
   let capabilities = null
   let wants = []

@@ -15,7 +15,7 @@ export class StreamReader {
   tell () {
     return this._discardedBytes + this.cursor
   }
-  async byte () {
+  async readUInt8 () {
     if (this.eof()) return
     if (!this.started) await this._init()
     if (this.cursor === this.buffer.length) {
@@ -23,7 +23,7 @@ export class StreamReader {
       if (this._ended) return
     }
     this._moveCursor(1)
-    return this.buffer[this.undoCursor]
+    return this.buffer.readUInt8(this.undoCursor)
   }
   async chunk () {
     if (this.eof()) return
@@ -35,7 +35,7 @@ export class StreamReader {
     this._moveCursor(this.buffer.length)
     return this.buffer.slice(this.undoCursor, this.cursor)
   }
-  async read (n) {
+  async slice (n) {
     if (this.eof()) return
     if (!this.started) await this._init()
     if (this.cursor + n > this.buffer.length) {

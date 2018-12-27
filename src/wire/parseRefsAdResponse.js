@@ -1,14 +1,14 @@
 import { E, GitError } from '../models/GitError.js'
 import { GitPktLine } from '../models/GitPktLine.js'
 
-export async function parseRefsAdResponse (stream, { service }) {
+export async function parseRefsAdResponse (buffer, { service }) {
   const capabilities = new Set()
   const refs = new Map()
   const symrefs = new Map()
 
   // There is probably a better way to do this, but for now
   // let's just throw the result parser inline here.
-  let read = GitPktLine.streamReader(stream)
+  let read = GitPktLine.streamReader(buffer)
   let lineOne = await read()
   // skip past any flushes
   while (lineOne === null) lineOne = await read()

@@ -11,7 +11,7 @@ import { StreamReader } from './StreamReader.js'
 export async function listpack (stream, onData) {
   let reader = new StreamReader(stream)
   let hash = new Hash()
-  let PACK = await reader.read(4)
+  let PACK = await reader.slice(4)
   hash.update(PACK)
   PACK = PACK.toString('utf8')
   if (PACK !== 'PACK') {
@@ -20,7 +20,7 @@ export async function listpack (stream, onData) {
     })
   }
 
-  let version = await reader.read(4)
+  let version = await reader.slice(4)
   hash.update(version)
   version = version.readUInt32BE(0)
   if (version !== 2) {
@@ -29,7 +29,7 @@ export async function listpack (stream, onData) {
     })
   }
 
-  let numObjects = await reader.read(4)
+  let numObjects = await reader.slice(4)
   hash.update(numObjects)
   numObjects = numObjects.readUInt32BE(0)
   // If (for some godforsaken reason) this is an empty packfile, abort now.
@@ -57,7 +57,7 @@ export async function listpack (stream, onData) {
 
         // Backtrack parser to where deflated data ends
         await reader.undo()
-        let buf = await reader.read(chunk.length - inflator.strm.avail_in)
+        let buf = await reader.slice(chunk.length - inflator.strm.avail_in)
         hash.update(buf)
         let end = reader.tell()
         onData({
@@ -78,7 +78,7 @@ export async function listpack (stream, onData) {
 
 async function parseHeader (reader, hash) {
   // Object type is encoded in bits 654
-  let byte = await reader.byte()
+  let byte = await reader.readUInt8()
   hash.update(Buffer.from([byte]))
   let type = (byte >> 4) & 0b111
   // The length encoding get complicated.
@@ -89,7 +89,7 @@ async function parseHeader (reader, hash) {
   if (byte & 0b10000000) {
     let shift = 4
     do {
-      byte = await reader.byte()
+      byte = await reader.readUInt8()
       hash.update(Buffer.from([byte]))
       length |= (byte & 0b01111111) << shift
       shift += 7
@@ -103,7 +103,7 @@ async function parseHeader (reader, hash) {
     ofs = 0
     let bytes = []
     do {
-      byte = await reader.byte()
+      byte = await reader.readUInt8()
       hash.update(Buffer.from([byte]))
       ofs |= (byte & 0b01111111) << shift
       shift += 7
@@ -112,7 +112,7 @@ async function parseHeader (reader, hash) {
     reference = Buffer.from(bytes)
   }
   if (type === 7) {
-    let buf = await reader.read(20)
+    let buf = await reader.slice(20)
     hash.update(buf)
     reference = buf
   }

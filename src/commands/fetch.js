@@ -256,19 +256,15 @@ async function fetchPackfile ({
   }
   let oids = await GitShallowManager.read({ fs, gitdir })
   let shallows = remoteHTTP.capabilities.has('shallow') ? [...oids] : []
-  let packstream = await writeUploadPackRequest({
+  let packbuffer = await writeUploadPackRequest({
     capabilities,
     wants,
     haves,
     shallows,
     depth,
     since,
-    exclude,
-    relative
+    exclude
   })
-  // CodeCommit will hang up if we don't send a Content-Length header
-  // so we can't stream the body.
-  let packbuffer = await pify(concat)(packstream)
   let raw = await GitRemoteHTTP.connect({
     core,
     corsProxy,

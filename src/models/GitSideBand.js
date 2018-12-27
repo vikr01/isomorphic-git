@@ -26,7 +26,7 @@ import { GitPktLine } from './GitPktLine'
 
 export class GitSideBand {
   static demux (input) {
-    let read = GitPktLine.streamReader(input)
+    let read = GitPktLine.reader(input)
     // And now for the ridiculous side-band or side-band-64k protocol
     let packetlines = new PassThrough()
     let packfile = new PassThrough()

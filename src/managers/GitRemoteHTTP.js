@@ -134,7 +134,7 @@ export class GitRemoteHTTP {
       body,
       headers
     })
-    if (statusCode !== 200) {
+    if (res.statusCode !== 200) {
       throw new GitError(E.HTTPError, {
         statusCode: res.statusCode,
         statusMessage: res.statusMessage
